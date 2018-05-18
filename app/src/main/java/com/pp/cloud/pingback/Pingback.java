@@ -1,12 +1,14 @@
 package com.pp.cloud.pingback;
 
-import android.os.Message;
+import com.pp.cloud.pingback.pingbackmodel.BasePingBackModel;
 
 /**
  * Created by hanzhang on 2018/5/10.
  */
 
 public class Pingback {
+
+    private BasePingBackModel mBasePingBackModel;
 
 
     /*package*/ static final int FLAG_IN_USE = 1 << 0;
@@ -48,6 +50,26 @@ public class Pingback {
         return new Pingback();
     }
 
+
+    /**
+     * Return a new Message instance from the global pool. Allows us to
+     * avoid allocating new objects in many cases.
+     */
+    public static Pingback obtain(BasePingBackModel basePingBackModel) {
+        synchronized (sPoolSync) {
+            if (sPool != null) {
+                Pingback m = sPool;
+                sPool = m.next;
+                m.next = null;
+           //     m.flags = 0; // clear in-use flag
+                m.mBasePingBackModel = basePingBackModel;
+                sPoolSize--;
+                return m;
+            }
+        }
+        return new Pingback();
+    }
+
     /**
      * Return a Message instance to the global pool.
      * <p>
@@ -75,17 +97,6 @@ public class Pingback {
         // Mark the message as in use while it remains in the recycled object pool.
         // Clear out all other details.
         flags = FLAG_IN_USE;
-       /* what = 0;
-        arg1 = 0;
-        arg2 = 0;
-        obj = null;
-        replyTo = null;
-        sendingUid = -1;
-        when = 0;
-        target = null;
-        callback = null;
-        data = null;*/
-
         synchronized (sPoolSync) {
             if (sPoolSize < MAX_POOL_SIZE) {
                 next = sPool;
@@ -97,5 +108,14 @@ public class Pingback {
 
     /*package*/ boolean isInUse() {
         return ((flags & FLAG_IN_USE) == FLAG_IN_USE);
+    }
+
+
+    public BasePingBackModel getmBasePingBackModel() {
+        return mBasePingBackModel;
+    }
+
+    public void setmBasePingBackModel(BasePingBackModel mBasePingBackModel) {
+        this.mBasePingBackModel = mBasePingBackModel;
     }
 }
