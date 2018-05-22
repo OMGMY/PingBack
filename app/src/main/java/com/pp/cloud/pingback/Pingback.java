@@ -61,7 +61,7 @@ public class Pingback {
                 Pingback m = sPool;
                 sPool = m.next;
                 m.next = null;
-           //     m.flags = 0; // clear in-use flag
+                m.flags = 0; // clear in-use flag
                 m.mBasePingBackModel = basePingBackModel;
                 sPoolSize--;
                 return m;
